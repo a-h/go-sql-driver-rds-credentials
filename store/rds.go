@@ -57,6 +57,11 @@ func (s *RDS) Get(force bool) (secret string, err error) {
 	return s.dsn, nil
 }
 
+// CallsMade to the underlying secret API.
+func (s *RDS) CallsMade() int {
+	return s.child.CallsMade()
+}
+
 type rdsSecret struct {
 	Username            string `json:"username"`
 	Password            string `json:"password"`

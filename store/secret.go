@@ -16,6 +16,7 @@ type Secret struct {
 	LastRefreshed time.Time
 	m             *sync.Mutex
 	Value         string
+	callsMade     int
 }
 
 const defaultCacheDuration = time.Hour * 24
@@ -45,8 +46,14 @@ func (s *Secret) Get(force bool) (secret string, err error) {
 		if err != nil {
 			return
 		}
+		s.callsMade++
 		s.Value = *result.SecretString
 		s.LastRefreshed = time.Now().UTC()
 	}
 	return s.Value, nil
+}
+
+// CallsMade to the underlying secret API.
+func (s *Secret) CallsMade() int {
+	return s.callsMade
 }
