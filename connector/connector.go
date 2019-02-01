@@ -3,6 +3,7 @@ package connector
 import (
 	"context"
 	"database/sql/driver"
+	"strings"
 	"sync"
 
 	"github.com/go-sql-driver/mysql"
@@ -36,7 +37,7 @@ func (c *Connector) Connect(ctx context.Context) (conn driver.Conn, err error) {
 	defer c.m.Unlock()
 	creds, err := c.store.Get(false)
 	conn, err = c.Driver().Open(creds)
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "Error 1045") {
 		creds, err = c.store.Get(true)
 		if err != nil {
 			return
