@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/a-h/rotationtest/store"
+	"github.com/a-h/go-sql-driver-rds-credentials/store"
 )
 
 var secretNameFlag = flag.String("secret", "", "The name of the secret.")
