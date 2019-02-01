@@ -1,6 +1,6 @@
-# Example of database credential rotation
+# go-sql-driver-rds-credentials
 
-# Problem
+Use AWS Secrets Manager with Go for automated database credential rotation without downtime.
 
 Changing database credentials while applications are running isn't possible when using `db.Open` because the DSN (connection string) is set as a parameter, and there's no way to change it.
 
