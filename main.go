@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -12,13 +13,29 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type fileCredentialStore struct {
+	Filename string
+}
+
+func (fcs fileCredentialStore) Get(force bool) (credential string, err error) {
+	bytes, err := ioutil.ReadFile(fcs.Filename)
+	if err != nil {
+		return
+	}
+	fmt.Printf("Credentials read: %v\n", string(bytes))
+	return string(bytes), err
+}
+
 func main() {
 	// CREATE USER 'gotest' IDENTIFIED BY 'first_pwd';
 	// GRANT ALL ON test.* TO 'gotest';
 
 	// SET PASSWORD FOR 'gotest' = PASSWORD('first_pwd');
 	// SET PASSWORD FOR 'gotest' = PASSWORD('new_pwd');
-	c := connector.New("gotest:first_pwd@tcp(localhost:3306)/test?parseTime=true&multiStatements=true")
+	fcs := fileCredentialStore{
+		Filename: "credentials.txt",
+	}
+	c := connector.New(fcs)
 	db := sql.OpenDB(c)
 	err := db.Ping()
 	if err != nil {
@@ -32,13 +49,12 @@ func main() {
 		fmt.Println("ERROR running first test:", err)
 	}
 
+	fmt.Println("Update the gotest user, and update credentials.txt")
 	fmt.Println("SET PASSWORD FOR 'gotest' = PASSWORD('new_pwd');")
 
 	// Wait to press enter.
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
-
-	c.UpdateDSN("gotest:new_pwd@tcp(localhost:3306)/test?parseTime=true&multiStatements=true")
 
 	// Run loads more tests.
 	for i := 0; i < 5; i++ {

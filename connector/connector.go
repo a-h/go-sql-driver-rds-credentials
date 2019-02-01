@@ -8,35 +8,42 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
+// CredentialStore is how credentials can be retrieved.
+type CredentialStore interface {
+	Get(force bool) (credential string, err error)
+}
+
 // New connector.
-func New(dsn string) *Connector {
+func New(store CredentialStore) *Connector {
 	return &Connector{
-		dsn: dsn,
-		d:   &mysql.MySQLDriver{},
-		m:   &sync.Mutex{},
+		store: store,
+		d:     &mysql.MySQLDriver{},
+		m:     &sync.Mutex{},
 	}
 }
 
 // Connector to MySQL.
 type Connector struct {
-	dsn string
-	d   *mysql.MySQLDriver
-	m   *sync.Mutex
-}
-
-// UpdateDSN updates the DSN.
-func (c *Connector) UpdateDSN(new string) {
-	c.m.Lock()
-	defer c.m.Unlock()
-	c.dsn = new
+	store CredentialStore
+	d     *mysql.MySQLDriver
+	m     *sync.Mutex
 }
 
 // Connect implements driver.Connector interface.
 // Connect returns a connection to the database.
-func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
+func (c *Connector) Connect(ctx context.Context) (conn driver.Conn, err error) {
 	c.m.Lock()
 	defer c.m.Unlock()
-	return c.Driver().Open(c.dsn)
+	creds, err := c.store.Get(false)
+	conn, err = c.Driver().Open(creds)
+	if err != nil {
+		creds, err = c.store.Get(true)
+		if err != nil {
+			return
+		}
+		conn, err = c.Driver().Open(creds)
+	}
+	return
 }
 
 // Driver implements driver.Connector interface.
