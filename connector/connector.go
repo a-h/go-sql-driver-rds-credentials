@@ -18,15 +18,19 @@ type CredentialStore interface {
 func New(store CredentialStore) *Connector {
 	return &Connector{
 		store: store,
-		d:     &mysql.MySQLDriver{},
+		d:     defaultDriver,
 		m:     &sync.Mutex{},
 	}
+}
+
+func defaultDriver() driver.Driver {
+	return mysql.MySQLDriver{}
 }
 
 // Connector to MySQL.
 type Connector struct {
 	store CredentialStore
-	d     *mysql.MySQLDriver
+	d     func() driver.Driver
 	m     *sync.Mutex
 }
 
@@ -36,6 +40,9 @@ func (c *Connector) Connect(ctx context.Context) (conn driver.Conn, err error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	creds, err := c.store.Get(false)
+	if err != nil {
+		return
+	}
 	conn, err = c.Driver().Open(creds)
 	if err != nil && strings.Contains(err.Error(), "Error 1045") {
 		creds, err = c.store.Get(true)
@@ -50,5 +57,5 @@ func (c *Connector) Connect(ctx context.Context) (conn driver.Conn, err error) {
 // Driver implements driver.Connector interface.
 // Driver returns &MySQLDriver{}.
 func (c *Connector) Driver() driver.Driver {
-	return c.d
+	return c.d()
 }
