@@ -4,9 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"github.com/a-h/go-sql-driver-rds-credentials/store/sm"
 )
 
 // Secret store, backed by AWS Secrets Manager.
@@ -20,21 +18,6 @@ type Secret struct {
 	callsMade     int
 }
 
-func defaultRetrieve(name string) (secret string, err error) {
-	svc := secretsmanager.New(session.New())
-	input := &secretsmanager.GetSecretValueInput{
-		SecretId:     aws.String(name),
-		VersionStage: aws.String("AWSCURRENT"),
-	}
-	var result *secretsmanager.GetSecretValueOutput
-	result, err = svc.GetSecretValue(input)
-	if err != nil {
-		return
-	}
-	secret = *result.SecretString
-	return
-}
-
 const defaultCacheDuration = time.Hour * 24
 
 // New creates a new store.
@@ -44,7 +27,7 @@ func New(name string) *Secret {
 		CacheFor:      defaultCacheDuration,
 		LastRefreshed: time.Time{},
 		m:             &sync.Mutex{},
-		retrieve:      defaultRetrieve,
+		retrieve:      sm.DefaultRetrieve,
 	}
 }
 

@@ -8,9 +8,14 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
+type secretGetter interface {
+	Get(force bool) (secret string, err error)
+	CallsMade() int
+}
+
 // RDS store, backed by AWS Secrets Manager.
 type RDS struct {
-	child    *Secret
+	child    secretGetter
 	config   *mysql.Config
 	previous string
 	m        *sync.Mutex
