@@ -78,7 +78,6 @@ func TestRDS(t *testing.T) {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-
 			rds := NewRDS("secret_ARN", "databaseName", map[string]string{
 				"parseTime":       "true",
 				"multiStatements": "true",

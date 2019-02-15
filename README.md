@@ -17,10 +17,19 @@ import (
 )
 
 func main() {
-  s := store.New("aws/secret/name")
-  c := connector.New(s)
+	s := store.NewRDS("secret_ARN", "databaseName", map[string]string{
+		"parseTime":       "true",
+		"multiStatements": "true",
+		"collation":       "utf8mb4_unicode_ci",
+	})
+	c := connector.New(s)
   db := sql.OpenDB(c)
   err := db.Ping()
+	if err != nil {
+		fmt.Println("error:", err)
+		os.Exit(1)
+	}
+	fmt.Println("OK")
 }
 ```
 
