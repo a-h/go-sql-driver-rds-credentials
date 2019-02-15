@@ -23,8 +23,8 @@ func main() {
 		"collation":       "utf8mb4_unicode_ci",
 	})
 	c := connector.New(s)
-  db := sql.OpenDB(c)
-  err := db.Ping()
+	db := sql.OpenDB(c)
+	err := db.Ping()
 	if err != nil {
 		fmt.Println("error:", err)
 		os.Exit(1)
