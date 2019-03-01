@@ -2,12 +2,6 @@
 
 Use AWS Secrets Manager with Go for automated database credential rotation without downtime.
 
-Changing database credentials while applications are running isn't possible when using `db.Open` because the DSN (connection string) is set as a parameter, and there's no way to change it.
-
-Using `db.OpenDB` allows this, but requires the `driver.Connector` interface to be implemented within the driver. The Go MySQL driver doesn't have it yet (https://github.com/go-sql-driver/mysql/issues/671), but the issue points out that it may be possible without changes to the library (by making an external implementation).
-
-This repo implements that connector, and demonstrates combining that with AWS Secrets Manager to allow automatic rotation of AWS RDS connection details from Go programs without having to shut down your programs.
-
 # Usage
 
 ```go
