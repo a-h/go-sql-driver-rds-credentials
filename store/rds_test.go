@@ -69,7 +69,7 @@ func TestRDS(t *testing.T) {
 				},
 			},
 			previousSecret:      "N/A",
-			expectedSecret:      "user:pwd@tcp(host_name:3306)/databaseName?collation=utf8mb4_unicode_ci&multiStatements=true&parseTime=true",
+			expectedSecret:      "user:pwd@tcp(host_name:3306)/databaseName?collation=utf8mb4_unicode_ci&multiStatements=true&parseTime=true&tls=rds",
 			expectedSecretCalls: 1,
 			expectedErr:         nil,
 		},
@@ -78,11 +78,14 @@ func TestRDS(t *testing.T) {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			rds := NewRDS("secret_ARN", "databaseName", map[string]string{
+			rds, err := NewRDS("secret_ARN", "databaseName", map[string]string{
 				"parseTime":       "true",
 				"multiStatements": "true",
 				"collation":       "utf8mb4_unicode_ci",
 			})
+			if err != nil {
+				t.Fatalf("unepxected error creating RDS: %v", err)
+			}
 			rds.previous = test.previousSecret
 			rds.child = test.secret
 			secret, err := rds.Get(false)
