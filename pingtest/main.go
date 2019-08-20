@@ -25,11 +25,14 @@ func main() {
 }
 
 func pingDB(secretARN, databaseName string) error {
-	s := store.NewRDS(secretARN, databaseName, map[string]string{
+	s, err := store.NewRDS(secretARN, databaseName, map[string]string{
 		"parseTime":       "true",
 		"multiStatements": "true",
 		"collation":       "utf8mb4_unicode_ci",
 	})
+	if err != nil {
+		return fmt.Errorf("pingDB: failed to create store: %v", err)
+	}
 	c := connector.New(s)
 	db := sql.OpenDB(c)
 	return db.Ping()

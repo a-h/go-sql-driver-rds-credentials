@@ -27,11 +27,14 @@ func main() {
 	fmt.Println()
 
 	fmt.Println("Getting database secret twice (to validate caching):")
-	rds := store.NewRDS(*secretNameFlag, "databaseName", map[string]string{
+	rds, err := store.NewRDS(*secretNameFlag, "databaseName", map[string]string{
 		"parseTime":       "true",
 		"multiStatements": "true",
 		"collation":       "utf8mb4_unicode_ci",
 	})
+	if err != nil {
+		panic(err)
+	}
 	secret, err = rds.Get(false)
 	if err != nil {
 		panic(err)

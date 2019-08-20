@@ -1,9 +1,15 @@
 package store
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"strconv"
 	"sync"
+
+	"github.com/a-h/go-sql-driver-rds-credentials/store/certs"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -24,15 +30,34 @@ type RDS struct {
 
 // NewRDS creates a new RDS store, passing the name of the secret, and a template DSN.
 // user:password@tcp(host:port)/dbname?parseTime=true&multiStatements=true&collation=utf8mb4_unicode_ci
-func NewRDS(name, dbName string, params map[string]string) *RDS {
+func NewRDS(name, dbName string, params map[string]string) (rds *RDS, err error) {
 	conf := mysql.NewConfig()
 	conf.DBName = dbName
 	conf.Params = params
-	return &RDS{
+
+	// Load the TLS certificates.
+	var pem []byte
+	pem, err = certs.Load()
+	if err != nil {
+		err = fmt.Errorf("store: could not load certificates: %v", err)
+		return
+	}
+	rcp := x509.NewCertPool()
+	if ok := rcp.AppendCertsFromPEM(pem); !ok {
+		err = errors.New("store: could not append certificates from PEM")
+		return
+	}
+	mysql.RegisterTLSConfig("rds", &tls.Config{
+		RootCAs: rcp,
+	})
+	conf.Params["tls"] = "rds"
+
+	rds = &RDS{
 		child:  New(name),
 		config: conf,
 		m:      &sync.Mutex{},
 	}
+	return
 }
 
 // Get the secret, optionally forcing a refresh.
