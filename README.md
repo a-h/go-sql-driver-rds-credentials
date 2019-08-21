@@ -11,11 +11,15 @@ import (
 )
 
 func main() {
-	s := store.NewRDS("secret_ARN", "databaseName", map[string]string{
+	s, err := store.NewRDS("secret_ARN", "databaseName", map[string]string{
 		"parseTime":       "true",
 		"multiStatements": "true",
 		"collation":       "utf8mb4_unicode_ci",
 	})
+	if err != nil {
+		fmt.Println("error:", err)
+		os.Exit(1)
+	}
 	c := connector.New(s)
 	db := sql.OpenDB(c)
 	err := db.Ping()
