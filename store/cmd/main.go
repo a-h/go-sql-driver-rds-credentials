@@ -14,11 +14,11 @@ func main() {
 
 	fmt.Println("Getting plain secret twice (to validate caching):")
 	s := store.New(*secretNameFlag)
-	secret, err := s.Get(false)
+	secret, err := s.Get()
 	if err != nil {
 		panic(err)
 	}
-	secret, err = s.Get(false)
+	secret, err = s.Get()
 	if err != nil {
 		panic(err)
 	}
@@ -35,11 +35,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	secret, err = rds.Get(false)
+	secret, err = rds.Get()
 	if err != nil {
 		panic(err)
 	}
-	secret, err = rds.Get(false)
+	secret, err = rds.Get()
 	if err != nil {
 		panic(err)
 	}
