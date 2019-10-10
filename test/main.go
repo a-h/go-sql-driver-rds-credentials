@@ -17,7 +17,16 @@ type fileCredentialStore struct {
 	Filename string
 }
 
-func (fcs fileCredentialStore) Get(force bool) (credential string, err error) {
+func (fcs fileCredentialStore) Get() (credential string, err error) {
+	bytes, err := ioutil.ReadFile(fcs.Filename)
+	if err != nil {
+		return
+	}
+	fmt.Printf("Credentials read: %v\n", string(bytes))
+	return string(bytes), err
+}
+
+func (fcs fileCredentialStore) Refresh(ifOlderThan time.Duration) (credential string, err error) {
 	bytes, err := ioutil.ReadFile(fcs.Filename)
 	if err != nil {
 		return

@@ -3,6 +3,7 @@ package store
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 func TestSecretRetrievalErrors(t *testing.T) {
@@ -14,7 +15,7 @@ func TestSecretRetrievalErrors(t *testing.T) {
 		}
 		return "expected_secret", retrievalError
 	}
-	_, err := sm.Get(true)
+	_, err := sm.Refresh(time.Second)
 	if err != retrievalError {
 		t.Errorf("expected err: %v, got: %v", retrievalError, err)
 	}
@@ -23,25 +24,25 @@ func TestSecretRetrievalErrors(t *testing.T) {
 func TestSecret(t *testing.T) {
 	tests := []struct {
 		name           string
-		getParameters  []bool
+		shouldRefresh  []bool
 		expectedCalls  int
 		expectedSecret string
 	}{
 		{
 			name:           "a single call to secret manager works fine",
-			getParameters:  []bool{false},
+			shouldRefresh:  []bool{false},
 			expectedCalls:  1,
 			expectedSecret: "expected_secret",
 		},
 		{
 			name:           "calls to secret manager are cached",
-			getParameters:  []bool{false, false},
+			shouldRefresh:  []bool{false, false},
 			expectedCalls:  1,
 			expectedSecret: "expected_secret",
 		},
 		{
 			name:           "calls to secret manager are cached unless force is used",
-			getParameters:  []bool{false, true},
+			shouldRefresh:  []bool{false, true},
 			expectedCalls:  2,
 			expectedSecret: "expected_secret",
 		},
@@ -62,8 +63,12 @@ func TestSecret(t *testing.T) {
 			}
 			var secret string
 			var err error
-			for _, force := range test.getParameters {
-				secret, err = sm.Get(force)
+			for _, shouldRefresh := range test.shouldRefresh {
+				if shouldRefresh {
+					secret, err = sm.Refresh(time.Duration(0))
+				} else {
+					secret, err = sm.Get()
+				}
 			}
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/a-h/go-sql-driver-rds-credentials/store/certs"
 
@@ -15,7 +16,8 @@ import (
 )
 
 type secretGetter interface {
-	Get(force bool) (secret string, err error)
+	Get() (secret string, err error)
+	Refresh(ifOlderThan time.Duration) (secret string, err error)
 	CallsMade() int
 }
 
@@ -60,9 +62,14 @@ func NewRDS(name, dbName string, params map[string]string) (rds *RDS, err error)
 	return
 }
 
-// Get the secret, optionally forcing a refresh.
-func (s *RDS) Get(force bool) (secret string, err error) {
-	j, err := s.child.Get(force)
+// Get the secret.
+func (s *RDS) Get() (secret string, err error) {
+	return s.Refresh(time.Duration(0))
+}
+
+// Refresh the secret if it's older than the duration.
+func (s *RDS) Refresh(ifOlderThan time.Duration) (secret string, err error) {
+	j, err := s.child.Refresh(ifOlderThan)
 	if err != nil {
 		return
 	}

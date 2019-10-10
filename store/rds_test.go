@@ -3,6 +3,7 @@ package store
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 func TestRDS(t *testing.T) {
@@ -88,7 +89,7 @@ func TestRDS(t *testing.T) {
 			}
 			rds.previous = test.previousSecret
 			rds.child = test.secret
-			secret, err := rds.Get(false)
+			secret, err := rds.Get()
 			if !errorsEqual(err, test.expectedErr) {
 				t.Fatalf("expected error: %v, got: %v", test.expectedErr, err)
 			}
@@ -126,13 +127,18 @@ type SecretGetResult struct {
 	Err        error
 }
 
-func (ms *mockSecret) Get(force bool) (credential string, err error) {
+func (ms *mockSecret) Get() (credential string, err error) {
 	results := ms.GetResults[ms.GetCalls]
 	credential, err = results.Credential, results.Err
 	ms.GetCalls++
-	if force {
-		ms.GetCallsForced++
-	}
+	return
+}
+
+func (ms *mockSecret) Refresh(ifOlderThan time.Duration) (credential string, err error) {
+	results := ms.GetResults[ms.GetCalls]
+	credential, err = results.Credential, results.Err
+	ms.GetCalls++
+	ms.GetCallsForced++
 	return
 }
 
