@@ -69,6 +69,8 @@ func TestSecret(t *testing.T) {
 				} else {
 					secret, err = sm.Get()
 				}
+				// Make sure it's not too quick.
+				time.Sleep(time.Nanosecond)
 			}
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
@@ -83,5 +85,48 @@ func TestSecret(t *testing.T) {
 				t.Errorf("reporting of secret manager calls, expected: %d, got %d", secretManagerCalls, sm.CallsMade())
 			}
 		})
+	}
+}
+
+func TestRefreshCaching(t *testing.T) {
+	var secretManagerCalls int
+	sm := New("secret_ARN")
+	sm.retrieve = func(arn string) (secret string, err error) {
+		secretManagerCalls++
+		if arn != "secret_ARN" {
+			t.Errorf("unexpected ARN: %v", arn)
+		}
+		return "expected_secret", nil
+	}
+	var secret string
+	var err error
+	secret, err = sm.Get()
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	// If the refresh period hasn't expired, it shouldn't access the secret again.
+	secret, err = sm.Refresh(time.Duration(time.Hour))
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if secret != "expected_secret" {
+		t.Errorf("expected secret '%v', got '%v'", "expected_secret", secret)
+	}
+	if secretManagerCalls != 1 {
+		t.Errorf("expected 1 call to secrets manager, got %v", secretManagerCalls)
+	}
+
+	// If the refresh period has expired, it should access the secret again.
+	time.Sleep(time.Millisecond * 2)
+	secret, err = sm.Refresh(time.Millisecond)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if secret != "expected_secret" {
+		t.Errorf("expected secret '%v', got '%v'", "expected_secret", secret)
+	}
+	if secretManagerCalls != 2 {
+		t.Errorf("expected 2 calls to secrets manager, got %v", secretManagerCalls)
 	}
 }
