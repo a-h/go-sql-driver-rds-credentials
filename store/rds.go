@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/a-h/go-sql-driver-rds-credentials/store/certs"
+	"github.com/marrickmedical/go-sql-driver-rds-credentials/store/certs"
 
 	"github.com/go-sql-driver/mysql"
 )

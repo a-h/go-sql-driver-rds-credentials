@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/a-h/go-sql-driver-rds-credentials/connector"
+	"github.com/marrickmedical/go-sql-driver-rds-credentials/connector"
 
 	_ "github.com/go-sql-driver/mysql"
 )
