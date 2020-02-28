@@ -6,7 +6,7 @@ import (
 	"github.com/rakyll/statik/fs"
 
 	// Used to import data with statik.
-	_ "github.com/marrickmedical/go-sql-driver-rds-credentials/store/certs/statik"
+	_ "github.com/a-h/go-sql-driver-rds-credentials/store/certs/statik"
 )
 
 // Load the certificates.

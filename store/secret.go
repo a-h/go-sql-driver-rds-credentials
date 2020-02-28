@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/marrickmedical/go-sql-driver-rds-credentials/store/sm"
+	"github.com/a-h/go-sql-driver-rds-credentials/store/sm"
 )
 
 // Secret store, backed by AWS Secrets Manager.

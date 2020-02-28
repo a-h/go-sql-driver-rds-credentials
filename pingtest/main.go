@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/marrickmedical/go-sql-driver-rds-credentials/connector"
-	"github.com/marrickmedical/go-sql-driver-rds-credentials/store"
+	"github.com/a-h/go-sql-driver-rds-credentials/connector"
+	"github.com/a-h/go-sql-driver-rds-credentials/store"
 )
 
 var secretARNFlag = flag.String("secret", "", "The name of the secret.")

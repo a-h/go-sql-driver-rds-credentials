@@ -6,8 +6,8 @@ Use AWS Secrets Manager with Go for automated database credential rotation witho
 
 ```go
 import (
-  "github.com/marrickmedical/go-sql-driver-rds-credentials/store"
-  "github.com/marrickmedical/go-sql-driver-rds-credentials/connector"
+  "github.com/a-h/go-sql-driver-rds-credentials/store"
+  "github.com/a-h/go-sql-driver-rds-credentials/connector"
 )
 
 func main() {
