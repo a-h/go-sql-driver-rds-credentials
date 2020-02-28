@@ -42,7 +42,12 @@ func NewRDS(name, dbName string, params map[string]string) (rds *RDS, err error)
 		err = fmt.Errorf("store: could not load certificates: %v", err)
 		return
 	}
-	rcp := x509.NewCertPool()
+	// Get the SystemCertPool, continue with an empty pool on error
+	rcp, _ := x509.SystemCertPool()
+	if rcp == nil {
+		rcp = x509.NewCertPool()
+	}
+
 	if ok := rcp.AppendCertsFromPEM(pem); !ok {
 		err = errors.New("store: could not append certificates from PEM")
 		return
